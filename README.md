@@ -52,13 +52,13 @@ Before you begin, ensure you have met the following requirements:
 <img aline="center" src="https://i.imgur.com/tK5cW5X.png" alt="secreenshot">
 
 #### Sign up:
-<img aline="center" src="https://imgur.com/tL62uya.png" alt="secreenshot">
+<img aline="center" src="https://i.imgur.com/PwymxhS.png" alt="secreenshot">
 
 
 #### NavBar:
-<img aline="center" src="https://imgur.com/5cJRbzq.png" alt="secreenshot">
+<img aline="center" src="https://i.imgur.com/5NO8dkN.png" alt="secreenshot">
 
 
-#### Projects Section (Slider Show):
-<img aline="center" src="https://imgur.com/9Fykk0q.png" alt="secreenshot">
+#### Profile:
+<img aline="center" src="https://i.imgur.com/5NO8dkN.png" alt="secreenshot">
 
