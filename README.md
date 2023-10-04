@@ -32,27 +32,25 @@ Before you begin, ensure you have met the following requirements:
 1. Clone the repository:
 
    ```bash
-   git clone https://github.com/yourusername/yourproject.git
+   git clone https://github.com/aminerhayem123/Events-Flutter.git
 
-Change directory to your project:
+2. Change directory to your project:
+    ```bash
+    cd Events-Flutter
 
-bash
-Copy code
-cd yourproject
-Install dependencies:
+3. Install dependencies:
+     ```bash
+     flutter pub get
+     
+3. Running the Application:
+     ```bash
+    flutter run
 
-bash
-Copy code
-flutter pub get
-Running the Application
-To run the application, use the following command:
-
-bash
-Copy code
-flutter run
-Specify any additional command line options or environment variables if needed for specific configurations.
 
 Screenshots
 Screenshot 1
 Screenshot 2
 Screenshot 3
+
+
+
