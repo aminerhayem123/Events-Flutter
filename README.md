@@ -1,6 +1,6 @@
 # Project Name
 
-![Project Logo or Screenshot](screenshots/project_screenshot.png)
+<img aline="center" src="https://i.imgur.com/oi5yU2A.png" alt="secreenshot">
 
 ## Description
 
