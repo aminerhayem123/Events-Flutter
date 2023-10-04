@@ -49,7 +49,7 @@ Before you begin, ensure you have met the following requirements:
 ### Screenshots from the EVENT APP:
 
 #### Login:
-<img aline="center" src="https://imgur.com/a/S7tw0rg#tK5cW5X/Login-EVENT.png" alt="secreenshot">
+<img aline="center" src="https://i.imgur.com/tK5cW5X.png" alt="secreenshot">
 
 #### Sign up:
 <img aline="center" src="https://imgur.com/tL62uya.png" alt="secreenshot">
