@@ -1,4 +1,4 @@
-# Project Name
+# EventZoom
 
 <img aline="center" src="https://i.imgur.com/oi5yU2A.png" alt="secreenshot">
 
