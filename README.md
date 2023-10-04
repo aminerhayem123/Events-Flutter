@@ -34,9 +34,27 @@ Now that you have Flutter and Dart set up, you can run your Flutter project:
 
 1. Clone this repository:
 
-```bash
 git clone <repository_url>
+
+Navigate to the project directory:
+
 cd flutter_firebase
+
+Install dependencies:
+
+bash
+Copy code
 flutter pub get
 Run the app:
+
+bash
+Copy code
 flutter run
+This will launch the app on your connected device or emulator.
+
+App Interfaces
+Here are some screenshots of the app's user interfaces:
+
+Interface 1
+Interface 2
+Interface 3
