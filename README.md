@@ -1,6 +1,6 @@
 # EventZoom
 
-<img aline="center" src="https://i.imgur.com/oi5yU2A.png" alt="secreenshot">
+<img align="center" src="https://i.imgur.com/oi5yU2A.png" alt="screenshot" width="200" height="150">
 
 ## Description
 
