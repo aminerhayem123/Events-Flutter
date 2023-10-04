@@ -46,19 +46,19 @@ Before you begin, ensure you have met the following requirements:
      ```bash
     flutter run
 
-# Interfaces :
+### Screenshots from the EVENT APP:
 
-Login Page 
-![Alt Text](https://imgur.com/tK5cW5X)
+#### Login:
+<img aline="center" src="https://imgur.com/a/S7tw0rg#tK5cW5X" alt="secreenshot">
+
+#### Sign up:
+<img aline="center" src="https://imgur.com/tL62uya.png" alt="secreenshot">
 
 
-SignUp Page 2
-![Alt Text](https://imgur.com/Ea9zXjQ)
+#### NavBar:
+<img aline="center" src="https://imgur.com/5cJRbzq.png" alt="secreenshot">
 
-NavBar 
-![Alt Text](https://imgur.com/kdq8NeC)
 
-Profile Page 
-![Alt Text](https://imgur.com/kdq8NeC)
-
+#### Projects Section (Slider Show):
+<img aline="center" src="https://imgur.com/9Fykk0q.png" alt="secreenshot">
 
