@@ -46,7 +46,6 @@ Before you begin, ensure you have met the following requirements:
      ```bash
     flutter run
 
-
 Screenshots
 Screenshot 1
 Screenshot 2
