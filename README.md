@@ -46,10 +46,19 @@ Before you begin, ensure you have met the following requirements:
      ```bash
     flutter run
 
-Screenshots
-Screenshot 1
-Screenshot 2
-Screenshot 3
+# Interfaces :
 
+Login Page 
+![Alt Text](https://imgur.com/3oX9l7s)
+
+
+SignUp Page 2
+![Alt Text](https://imgur.com/Ea9zXjQ)
+
+NavBar 
+![Alt Text](https://imgur.com/kdq8NeC)
+
+Profile Page 
+![Alt Text](https://imgur.com/kdq8NeC)
 
 
