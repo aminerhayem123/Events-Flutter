@@ -4,7 +4,7 @@
 
 ## Description
 
-This Flutter project is a mobile application that [An event booking app streamlines event discovery, ticket purchasing, and event management. It enables users to easily find and book tickets for various events, while organizers benefit from tools to efficiently manage and promote their events. These apps enhance the overall event experience by offering convenience and accessibility.].
+This Flutter project is a mobile application that [streamlines event discovery, ticket purchasing, and event management. It enables users to easily find and book tickets for various events, while organizers benefit from tools to efficiently manage and promote their events. These apps enhance the overall event experience by offering convenience and accessibility.].
 
 ## Table of Contents
 
