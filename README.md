@@ -62,3 +62,12 @@ Before you begin, ensure you have met the following requirements:
 #### Profile:
 <img aline="center" src="https://i.imgur.com/5NO8dkN.png" alt="secreenshot">
 
+#### HomePage:
+<img aline="center" src="https://i.imgur.com/5NO8dkN.png" alt="secreenshot">
+
+#### Add Event:
+<img aline="center" src="https://i.imgur.com/5NO8dkN.png" alt="secreenshot">
+
+#### reset password:
+<img aline="center" src="https://i.imgur.com/5NO8dkN.png" alt="secreenshot">
+
