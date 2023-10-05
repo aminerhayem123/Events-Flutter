@@ -5,7 +5,7 @@ import 'package:flutter_firebase/features/user_auth/presentation/widgets/form_co
 import '../../firebase_auth_implementation/firebase_auth_services.dart';
 
 class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+  const LoginPage({Key? key});
 
   @override
   State<LoginPage> createState() => _LoginPageState();
@@ -139,7 +139,26 @@ class _LoginPageState extends State<LoginPage> {
                         ],
                       ),
                     ),
-                  )
+                  ),
+                  SizedBox(height: 10),
+                  ElevatedButton(
+                    onPressed: _showForgotPasswordDialog,
+                    style: ElevatedButton.styleFrom(
+                      primary: Colors.red, // Button color for "Forgot Password"
+                      padding: EdgeInsets.symmetric(vertical: 15),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    child: Text(
+                      "Forgot Password",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -158,11 +177,25 @@ class _LoginPageState extends State<LoginPage> {
     });
 
     try {
-      User? user = await _auth.signInWithEmailAndPassword(email, password);
+      UserCredential userCredential =
+          await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
 
-      if (user != null) {
-        print("User is successfully signed in");
-        Navigator.pushNamed(context, "/home");
+      if (userCredential.user != null) {
+        if (userCredential.user!.emailVerified) {
+          print("User is successfully signed in");
+          Navigator.pushNamed(context, "/home");
+        } else {
+          setState(() {
+            _errorText =
+                "Please verify your email before logging in. Resend verification email?";
+          });
+
+          // Send a new email verification link
+          await userCredential.user!.sendEmailVerification();
+        }
       }
     } catch (e) {
       setState(() {
@@ -170,5 +203,112 @@ class _LoginPageState extends State<LoginPage> {
       });
       print("Error: $e");
     }
+  }
+
+  void _showForgotPasswordDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        String email = '';
+
+        return AlertDialog(
+          backgroundColor:
+              Colors.transparent, // Make the background transparent
+          content: Stack(
+            alignment: Alignment.center,
+            children: [
+              // Background Image
+              Container(
+                decoration: BoxDecoration(
+                  image: DecorationImage(
+                    image: NetworkImage('web/4.jpg'), // Replace with your image
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
+              // Dialog Content
+              Container(
+                width: double.infinity,
+                height: double.infinity,
+                color: Colors
+                    .transparent, // Make the content background transparent
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: Text(
+                        "Forgot Password",
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white, // Text color
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: TextField(
+                        onChanged: (value) {
+                          email = value;
+                        },
+                        decoration: InputDecoration(
+                          labelText: "Email",
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          ElevatedButton(
+                            onPressed: () async {
+                              if (email.isNotEmpty) {
+                                try {
+                                  await FirebaseAuth.instance
+                                      .sendPasswordResetEmail(email: email);
+                                  Navigator.pop(context); // Close the dialog
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                          "Password reset email sent to $email."),
+                                    ),
+                                  );
+                                } catch (e) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                          "Failed to send password reset email. Error: $e"),
+                                    ),
+                                  );
+                                }
+                              }
+                            },
+                            style: ElevatedButton.styleFrom(
+                              primary: Color.fromARGB(255, 155, 22,
+                                  185), // Change the button color to red (light)
+                            ),
+                            child: Text("Send Reset Email"),
+                          ),
+                          ElevatedButton(
+                            onPressed: () {
+                              Navigator.pop(context); // Close the dialog
+                            },
+                            style:
+                                ElevatedButton.styleFrom(primary: Colors.red),
+                            child: Text("Cancel"),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 }

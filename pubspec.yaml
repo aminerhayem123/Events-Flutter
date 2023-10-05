@@ -41,6 +41,8 @@ dependencies:
   firebase_storage: ^11.2.4
   google_maps_flutter: ^2.5.0
   image_picker: ^1.0.4
+  multi_image_picker: ^4.8.0
+  intl: ^0.17.0  # Add the intl package with a suitable version
 
 
 dev_dependencies:
