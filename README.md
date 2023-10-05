@@ -49,25 +49,20 @@ Before you begin, ensure you have met the following requirements:
 ### Screenshots from the EVENT APP:
 
 #### Login:
-<img aline="center" src="https://i.imgur.com/tK5cW5X.png" alt="secreenshot">
+<img aline="center" src="https://i.imgur.com/PkVejB8.png" alt="secreenshot">
 
 #### Sign up:
-<img aline="center" src="https://i.imgur.com/PwymxhS.png" alt="secreenshot">
-
-
-#### NavBar:
-<img aline="center" src="https://i.imgur.com/5NO8dkN.png" alt="secreenshot">
-
+<img aline="center" src="https://i.imgur.com/ayREHoW.png" alt="secreenshot">
 
 #### Profile:
-<img aline="center" src="https://i.imgur.com/5NO8dkN.png" alt="secreenshot">
+<img aline="center" src="https://i.imgur.com/0ngGfA9.png" alt="secreenshot">
 
 #### HomePage:
-<img aline="center" src="https://i.imgur.com/5NO8dkN.png" alt="secreenshot">
+<img aline="center" src="https://i.imgur.com/k5kx3MG.png" alt="secreenshot">
 
 #### Add Event:
-<img aline="center" src="https://i.imgur.com/5NO8dkN.png" alt="secreenshot">
+<img aline="center" src="https://i.imgur.com/UliwWO0.png" alt="secreenshot">
 
 #### reset password:
-<img aline="center" src="https://i.imgur.com/5NO8dkN.png" alt="secreenshot">
+<img aline="center" src="https://i.imgur.com/HKOwKqc.png" alt="secreenshot">
 
