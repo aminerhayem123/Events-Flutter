@@ -13,6 +13,7 @@ Future main() async {
       options: FirebaseOptions(
         apiKey: "AIzaSyC7a5Q8swhWFwj6hudI3PC57aNGTw0GLHk",
         appId: "1:987643428825:web:6b2ac1887cf77cb47023c8",
+        storageBucket: "events-6b65e.appspot.com",
         messagingSenderId: "987643428825",
         projectId: "events-6b65e",
         // Your web Firebase config options

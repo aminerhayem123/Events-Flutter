@@ -1,7 +1,7 @@
-import 'dart:io';
-import 'dart:convert';
-import 'dart:typed_data'; // Import dart:typed_data for Uint8List
+import 'dart:typed_data';
+
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:image_picker/image_picker.dart';
@@ -12,24 +12,22 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Define the URL of your background image
     final backgroundImageUrl = 'web/5.jpg';
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor:
-            Color.fromARGB(194, 196, 2, 44), // Set app bar background color
+        backgroundColor: Color.fromARGB(194, 196, 2, 44),
         title: Text(
           "EventZoom",
           style: TextStyle(
-            color: Colors.white, // Set text color to white
+            color: Colors.white,
           ),
         ),
         actions: [
           IconButton(
             icon: Icon(
               Icons.notifications,
-              color: Colors.white, // Set icon color to white
+              color: Colors.white,
             ),
             onPressed: () {
               // Add notifications functionality here
@@ -38,7 +36,7 @@ class HomePage extends StatelessWidget {
           IconButton(
             icon: Icon(
               Icons.person,
-              color: Colors.white, // Set icon color to white
+              color: Colors.white,
             ),
             onPressed: () {
               Navigator.push(
@@ -50,7 +48,7 @@ class HomePage extends StatelessWidget {
           IconButton(
             icon: Icon(
               Icons.add,
-              color: Colors.white, // Set icon color to white
+              color: Colors.white,
             ),
             onPressed: () {
               Navigator.push(
@@ -67,8 +65,7 @@ class HomePage extends StatelessWidget {
           children: <Widget>[
             DrawerHeader(
               decoration: BoxDecoration(
-                color: Color.fromARGB(194, 196, 2,
-                    44), // Set the drawer header background color to purple
+                color: Color.fromARGB(194, 196, 2, 44),
               ),
               child: Text(
                 "Welcome TO EventZoom!",
@@ -84,7 +81,7 @@ class HomePage extends StatelessWidget {
               title: Text(
                 "Profile",
                 style: TextStyle(
-                  color: Colors.black, // Set the text color to black
+                  color: Colors.black,
                 ),
               ),
               onTap: () {
@@ -95,11 +92,11 @@ class HomePage extends StatelessWidget {
               },
             ),
             ListTile(
-              leading: Icon(Icons.event), // Icon for "Add Event"
+              leading: Icon(Icons.event),
               title: Text(
                 "Add Event",
                 style: TextStyle(
-                  color: Colors.black, // Set the text color to black
+                  color: Colors.black,
                 ),
               ),
               onTap: () {
@@ -114,7 +111,7 @@ class HomePage extends StatelessWidget {
               title: Text(
                 "Logout",
                 style: TextStyle(
-                  color: Colors.black, // Set the text color to black
+                  color: Colors.black,
                 ),
               ),
               onTap: () {
@@ -125,82 +122,83 @@ class HomePage extends StatelessWidget {
           ],
         ),
       ),
-      body: Stack(children: [
-        Container(
-          decoration: BoxDecoration(
-            // Set the background image using NetworkImage
-            image: DecorationImage(
-              image: NetworkImage(backgroundImageUrl),
-              fit: BoxFit.cover, // Adjust this as needed
+      body: Stack(
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: NetworkImage(backgroundImageUrl),
+                fit: BoxFit.cover,
+              ),
             ),
           ),
-        ),
-        // Semi-transparent overlay
-        Container(
-          color: Colors.black.withOpacity(0.6), // Adjust opacity as needed
-        ),
-        StreamBuilder(
-          stream: FirebaseFirestore.instance.collection('events').snapshots(),
-          builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return CircularProgressIndicator(); // Loading indicator
-            } else if (snapshot.hasError) {
-              return Text('Error: ${snapshot.error}');
-            } else {
-              final events = snapshot.data!.docs;
+          Container(
+            color: Colors.black.withOpacity(0.6),
+          ),
+          StreamBuilder(
+            stream: FirebaseFirestore.instance.collection('events').snapshots(),
+            builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return CircularProgressIndicator();
+              } else if (snapshot.hasError) {
+                return Text('Error: ${snapshot.error}');
+              } else {
+                final events = snapshot.data!.docs;
 
-              return ListView.builder(
-                itemCount: events.length,
-                itemBuilder: (context, index) {
-                  final event = events[index].data() as Map<String, dynamic>;
-                  final title = event['EventTitle'] ?? '';
-                  final date = event['EventDate'] != null
-                      ? (event['EventDate'] as Timestamp).toDate()
-                      : DateTime.now();
-                  final imageUrls = event['EventImages'] ?? [];
+                // Inside the ListView.builder in HomePage
+                return ListView.builder(
+                  itemCount: events.length,
+                  itemBuilder: (context, index) {
+                    final event = events[index].data() as Map<String, dynamic>;
+                    final title = event['EventTitle'] ?? '';
+                    final date = event['EventDate'] != null
+                        ? (event['EventDate'] as Timestamp).toDate()
+                        : DateTime.now();
+                    final imageUrl =
+                        event['EventImage']; // Update to use 'EventImage'
 
-                  return Card(
-                    margin: EdgeInsets.all(16),
-                    child: Column(
-                      children: [
-                        if (imageUrls.isNotEmpty)
-                          Image.network(
-                            imageUrls[0], // Display the first image
-                            width: double.infinity,
-                            height: 200,
-                            fit: BoxFit.cover,
-                          ),
-                        Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                title,
-                                style: TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
+                    return Card(
+                      margin: EdgeInsets.all(16),
+                      child: Column(
+                        children: [
+                          if (imageUrl != null) // Check if imageUrl is not null
+                            Image.network(
+                              imageUrl,
+                              width: double.infinity,
+                              height: 200,
+                              fit: BoxFit.cover,
+                            ),
+                          Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  title,
+                                  style: TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
-                              ),
-                              Text(
-                                DateFormat('MMMM d, y HH:mm')
-                                    .format(date), // Format the date with time
-                                style: TextStyle(
-                                  color: Colors.grey,
+                                Text(
+                                  DateFormat('MMMM d, y HH:mm').format(date),
+                                  style: TextStyle(
+                                    color: Colors.grey,
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                  );
-                },
-              );
-            }
-          },
-        ),
-      ]),
+                        ],
+                      ),
+                    );
+                  },
+                );
+              }
+            },
+          ),
+        ],
+      ),
     );
   }
 }
@@ -263,7 +261,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 _showPasswordChangeDialog(context);
               },
               style: ElevatedButton.styleFrom(
-                primary: Color.fromARGB(194, 196, 2, 44), // Button color
+                primary: Color.fromARGB(194, 196, 2, 44),
                 padding: EdgeInsets.symmetric(vertical: 15),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
@@ -366,16 +364,15 @@ class _AddEventPageState extends State<AddEventPage> {
         title: Text(
           "Add Event",
           style: TextStyle(
-            color: Colors.white, // Set text color to purple
+            color: Colors.white,
           ),
         ),
-        backgroundColor: Color.fromARGB(
-            194, 196, 2, 44), // Set the app bar background color to purple
+        backgroundColor: Color.fromARGB(194, 196, 2, 44),
         actions: [
           IconButton(
             icon: Icon(
               Icons.check,
-              color: const Color.fromARGB(255, 255, 255, 255), // Button color
+              color: const Color.fromARGB(255, 255, 255, 255),
             ),
             onPressed: () {
               _addEventToFirebase();
@@ -393,7 +390,7 @@ class _AddEventPageState extends State<AddEventPage> {
               decoration: InputDecoration(
                 labelText: "Event Title",
                 labelStyle: TextStyle(
-                  color: Color.fromARGB(194, 196, 2, 44), // Button color,
+                  color: Color.fromARGB(194, 196, 2, 44),
                 ),
               ),
             ),
@@ -413,14 +410,14 @@ class _AddEventPageState extends State<AddEventPage> {
                 }
               },
               style: TextButton.styleFrom(
-                primary: Color.fromARGB(194, 196, 2, 44), // Button color,
+                primary: Color.fromARGB(194, 196, 2, 44),
               ),
               child: Text("Select Date"),
             ),
             Text(
               "Selected Date: ${DateFormat('yyyy MM dd').format(_selectedDate)}",
               style: TextStyle(
-                color: Color.fromARGB(194, 196, 2, 44), // Button color,
+                color: Color.fromARGB(194, 196, 2, 44),
               ),
             ),
             SizedBox(height: 20),
@@ -476,7 +473,7 @@ class _AddEventPageState extends State<AddEventPage> {
                 _pickImage();
               },
               style: ElevatedButton.styleFrom(
-                primary: Color.fromARGB(194, 196, 2, 44), // Button color,
+                primary: Color.fromARGB(194, 196, 2, 44),
               ),
               child: Text(
                 "Add Image",
@@ -494,20 +491,17 @@ class _AddEventPageState extends State<AddEventPage> {
     );
   }
 
-  // Function to pick an image from the device
   Future<void> _pickImage() async {
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
 
     if (pickedFile != null) {
       final bytes = await pickedFile.readAsBytes();
       setState(() {
-        // Add the selected image data as Uint8List
         _imageBytes.add(Uint8List.fromList(bytes));
       });
     }
   }
 
-  // Function to build a preview of selected images
   Widget _buildImagePreview() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -527,19 +521,37 @@ class _AddEventPageState extends State<AddEventPage> {
     final date = _selectedDate
         .add(Duration(hours: _selectedHour, minutes: _selectedMinute));
 
-    final List<String> imageBase64List = _imageBytes
-        .map((bytes) => base64Encode(bytes))
-        .toList(); // Convert Uint8List images to base64 strings
+    // Generate a unique ID for the event
+    final eventId = FirebaseFirestore.instance.collection('events').doc().id;
 
-    final eventData = {
-      'EventTitle': title,
-      'EventDate': date,
-      'EventImages':
-          imageBase64List, // Store base64-encoded strings in Firestore
-    };
+    // Reference to the Firebase Storage bucket
+    final storageReference =
+        FirebaseStorage.instance.ref().child('event_images/$eventId.jpg');
 
-    // Add the event data to the "events" collection in Firestore
-    await FirebaseFirestore.instance.collection('events').add(eventData);
+    try {
+      // Upload the image to Firebase Storage
+      await storageReference.putData(_imageBytes[0]);
+
+      // Get the download URL of the uploaded image
+      final imageUrl = await storageReference.getDownloadURL();
+
+      final eventData = {
+        'EventTitle': title,
+        'EventDate': date,
+        'EventImage': imageUrl, // Store the image URL
+      };
+
+      // Save event details to Firestore
+      await FirebaseFirestore.instance
+          .collection('events')
+          .doc(eventId)
+          .set(eventData);
+
+      Navigator.pop(context); // Close the AddEventPage
+    } catch (e) {
+      // Handle errors here
+      print('Error uploading image: $e');
+    }
   }
 
   @override
