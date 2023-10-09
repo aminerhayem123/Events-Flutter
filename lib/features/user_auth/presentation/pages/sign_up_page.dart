@@ -154,13 +154,112 @@ class _SignUpPageState extends State<SignUpPage> {
     String email = _emailController.text;
     String password = _passwordController.text;
 
-    User? user = await _auth.signUpWithEmailAndPassword(email, password);
+    // Regular expression to validate email format
+    final emailRegExp = RegExp(r'^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$');
 
-    if (user != null) {
-      print("User is successfully created");
-      Navigator.pushNamed(context, "/home");
+    // Check if any of the input fields is empty
+    if (username.isEmpty || email.isEmpty || password.isEmpty) {
+      // Show a message to the user
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text("Error"),
+            content: Text("Please fill in all fields."),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop(); // Close the dialog
+                },
+                child: Text("OK"),
+              ),
+            ],
+          );
+        },
+      );
+    } else if (!emailRegExp.hasMatch(email)) {
+      // Check if email format is invalid and show an error message
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text("Email Error"),
+            content: Text("Please enter a valid email address."),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop(); // Close the dialog
+                },
+                child: Text("OK"),
+              ),
+            ],
+          );
+        },
+      );
+    } else if (password.length < 6 ||
+        !password.contains(RegExp(r'[A-Z]')) ||
+        !password.contains(RegExp(r'[a-zA-Z0-9]'))) {
+      // Check password requirements and show an error message
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text("Password Error"),
+            content: Text(
+                "Password must be at least 6 characters long, contain at least one uppercase letter, and contain only letters and numbers."),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop(); // Close the dialog
+                },
+                child: Text("OK"),
+              ),
+            ],
+          );
+        },
+      );
     } else {
-      print("Some error happened");
+      // Check if the email is already in use
+      try {
+        final UserCredential userCredential =
+            await FirebaseAuth.instance.createUserWithEmailAndPassword(
+          email: email,
+          password: password,
+        );
+        // User registration was successful, you can proceed to navigate to the home screen
+        print("User is successfully created");
+        Navigator.pushNamed(context, "/home");
+      } catch (e) {
+        // Check if the exception is of type FirebaseAuthException
+        if (e is FirebaseAuthException) {
+          // If registration fails due to email already in use, show an error message
+          if (e.code == 'email-already-in-use') {
+            showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return AlertDialog(
+                  title: Text("Email Already in Use"),
+                  content: Text(
+                      "The email address is already in use. Please use a different email."),
+                  actions: [
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pop(); // Close the dialog
+                      },
+                      child: Text("OK"),
+                    ),
+                  ],
+                );
+              },
+            );
+          } else {
+            print("Error code: ${e.code}");
+            print("Error message: ${e.message}");
+          }
+        } else {
+          print("Error occurred during registration: ${e.toString()}");
+        }
+      }
     }
   }
 }
