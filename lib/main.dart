@@ -1,10 +1,10 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_firebase/features/app/splash_screen/splash_screen.dart';
 import 'package:flutter_firebase/features/user_auth/presentation/pages/home_page.dart';
 import 'package:flutter_firebase/features/user_auth/presentation/pages/login_page.dart';
 import 'package:flutter_firebase/features/user_auth/presentation/pages/sign_up_page.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -31,10 +31,27 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Flutter Firebase',
+      initialRoute: '/', // Set the initial route to '/'
       routes: {
-        '/': (context) => SplashScreen(
-              // Here, you can decide whether to show the LoginPage or HomePage based on user authentication
-              child: LoginPage(),
+        '/': (context) => StreamBuilder(
+              // Use a StreamBuilder to listen to changes in the user's authentication state
+              stream: FirebaseAuth.instance.authStateChanges(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.active) {
+                  // If the connection is active, check if the user is authenticated
+                  final user = FirebaseAuth.instance.currentUser;
+                  if (user != null) {
+                    // If the user is authenticated, navigate to the HomePage
+                    return HomePage();
+                  } else {
+                    // If the user is not authenticated, navigate to the LoginPage
+                    return LoginPage();
+                  }
+                } else {
+                  // If the connection is not active, display a loading indicator
+                  return CircularProgressIndicator();
+                }
+              },
             ),
         '/login': (context) => LoginPage(),
         '/signUp': (context) => SignUpPage(),
