@@ -5,7 +5,7 @@ import 'package:flutter_firebase/features/user_auth/presentation/pages/login_pag
 import 'package:flutter_firebase/features/user_auth/presentation/widgets/form_container_widget.dart';
 
 class SignUpPage extends StatefulWidget {
-  const SignUpPage({super.key});
+  const SignUpPage({Key? key}) : super(key: key);
 
   @override
   State<SignUpPage> createState() => _SignUpPageState();
@@ -226,9 +226,34 @@ class _SignUpPageState extends State<SignUpPage> {
           email: email,
           password: password,
         );
-        // User registration was successful, you can proceed to navigate to the home screen
+        // User registration was successful
         print("User is successfully created");
-        Navigator.pushNamed(context, "/home");
+
+        // Show a success message
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text("Success"),
+              content: Text("Registration successful."),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop(); // Close the dialog
+                    Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => LoginPage(),
+                      ),
+                      (route) => false,
+                    );
+                  },
+                  child: Text("OK"),
+                ),
+              ],
+            );
+          },
+        );
       } catch (e) {
         // Check if the exception is of type FirebaseAuthException
         if (e is FirebaseAuthException) {
