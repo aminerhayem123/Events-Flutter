@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart'; // Import Firestore package
 import 'package:flutter_firebase/features/user_auth/firebase_auth_implementation/firebase_auth_services.dart';
 import 'package:flutter_firebase/features/user_auth/presentation/pages/login_page.dart';
 import 'package:flutter_firebase/features/user_auth/presentation/widgets/form_container_widget.dart';
@@ -17,6 +18,7 @@ class _SignUpPageState extends State<SignUpPage> {
   TextEditingController _usernameController = TextEditingController();
   TextEditingController _emailController = TextEditingController();
   TextEditingController _passwordController = TextEditingController();
+  String? _selectedRole; // Track selected role
 
   @override
   void dispose() {
@@ -35,8 +37,7 @@ class _SignUpPageState extends State<SignUpPage> {
           Container(
             decoration: BoxDecoration(
               image: DecorationImage(
-                image: NetworkImage(
-                    'web/background.png'), // Load the second background image
+                image: NetworkImage('web/background.png'),
                 fit: BoxFit.cover,
               ),
             ),
@@ -53,18 +54,19 @@ class _SignUpPageState extends State<SignUpPage> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Image.network(
-                        'web/logo.png', // Load the first image
-                        width: 50, // Adjust the width as needed
-                        height: 50, // Adjust the height as needed
+                        'web/logo.png',
+                        width: 50,
+                        height: 50,
                       ),
                       SizedBox(
-                          width: 10), // Add spacing between the image and text
+                        width: 10,
+                      ),
                       Text(
                         "Sign Up",
                         style: TextStyle(
                           fontSize: 27,
                           fontWeight: FontWeight.bold,
-                          color: Colors.white, // Text color
+                          color: Colors.white,
                         ),
                       ),
                     ],
@@ -88,10 +90,45 @@ class _SignUpPageState extends State<SignUpPage> {
                     isPasswordField: true,
                   ),
                   SizedBox(height: 30),
+                  // Role selection checkboxes
+                  Column(
+                    children: [
+                      Row(
+                        children: [
+                          Checkbox(
+                            value: _selectedRole == 'Event Owner',
+                            onChanged: (value) {
+                              setState(() {
+                                _selectedRole =
+                                    value ?? false ? 'Event Owner' : null;
+                              });
+                            },
+                          ),
+                          Text('Event Owner'),
+                        ],
+                      ),
+                      Row(
+                        children: [
+                          Checkbox(
+                            value: _selectedRole == 'Simple User',
+                            onChanged: (value) {
+                              if (value != null) {
+                                setState(() {
+                                  _selectedRole = value ? 'Simple User' : null;
+                                });
+                              }
+                            },
+                          ),
+                          Text('Simple User'),
+                        ],
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 30),
                   ElevatedButton(
                     onPressed: _signUp,
                     style: ElevatedButton.styleFrom(
-                      primary: Colors.purple, // Button color
+                      primary: Colors.purple,
                       padding: EdgeInsets.symmetric(vertical: 15),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
@@ -113,8 +150,7 @@ class _SignUpPageState extends State<SignUpPage> {
                       Text(
                         "Already have an account? ",
                         style: TextStyle(
-                          color: Colors
-                              .white, // Text color for "Already have an account?"
+                          color: Colors.white,
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
                         ),
@@ -169,7 +205,7 @@ class _SignUpPageState extends State<SignUpPage> {
             actions: [
               TextButton(
                 onPressed: () {
-                  Navigator.of(context).pop(); // Close the dialog
+                  Navigator.of(context).pop();
                 },
                 child: Text("OK"),
               ),
@@ -188,7 +224,7 @@ class _SignUpPageState extends State<SignUpPage> {
             actions: [
               TextButton(
                 onPressed: () {
-                  Navigator.of(context).pop(); // Close the dialog
+                  Navigator.of(context).pop();
                 },
                 child: Text("OK"),
               ),
@@ -210,7 +246,26 @@ class _SignUpPageState extends State<SignUpPage> {
             actions: [
               TextButton(
                 onPressed: () {
-                  Navigator.of(context).pop(); // Close the dialog
+                  Navigator.of(context).pop();
+                },
+                child: Text("OK"),
+              ),
+            ],
+          );
+        },
+      );
+    } else if (_selectedRole == null) {
+      // Check if the user has selected a role
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text("Role Error"),
+            content: Text("Please select a role."),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
                 },
                 child: Text("OK"),
               ),
@@ -219,17 +274,29 @@ class _SignUpPageState extends State<SignUpPage> {
         },
       );
     } else {
-      // Check if the email is already in use
       try {
         final UserCredential userCredential =
             await FirebaseAuth.instance.createUserWithEmailAndPassword(
           email: email,
           password: password,
         );
+
         // User registration was successful
+
+        // Get the Firebase user ID
+        String userId = userCredential.user!.uid;
+
+        // Save the user's role and ID in Firestore
+        await FirebaseFirestore.instance.collection('users').doc(userId).set({
+          'username': username,
+          'email': email,
+          'role': _selectedRole,
+        });
+
         print("User is successfully created");
 
         // Show a success message
+
         showDialog(
           context: context,
           builder: (BuildContext context) {
@@ -239,7 +306,7 @@ class _SignUpPageState extends State<SignUpPage> {
               actions: [
                 TextButton(
                   onPressed: () {
-                    Navigator.of(context).pop(); // Close the dialog
+                    Navigator.of(context).pop();
                     Navigator.pushAndRemoveUntil(
                       context,
                       MaterialPageRoute(
@@ -255,9 +322,7 @@ class _SignUpPageState extends State<SignUpPage> {
           },
         );
       } catch (e) {
-        // Check if the exception is of type FirebaseAuthException
         if (e is FirebaseAuthException) {
-          // If registration fails due to email already in use, show an error message
           if (e.code == 'email-already-in-use') {
             showDialog(
               context: context,
@@ -269,7 +334,7 @@ class _SignUpPageState extends State<SignUpPage> {
                   actions: [
                     TextButton(
                       onPressed: () {
-                        Navigator.of(context).pop(); // Close the dialog
+                        Navigator.of(context).pop();
                       },
                       child: Text("OK"),
                     ),

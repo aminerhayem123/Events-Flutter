@@ -7,8 +7,45 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 
-class HomePage extends StatelessWidget {
+import 'dart:typed_data';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
+
+class HomePage extends StatefulWidget {
   const HomePage({Key? key});
+
+  @override
+  _HomePageState createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  String _userRole = ''; // Store the user's role
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchUserRole(); // Fetch the user's role when the page loads
+  }
+
+  Future<void> _fetchUserRole() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      final userId = user.uid;
+      final userData = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userId)
+          .get();
+      final userRole = userData.data()?['role'] ??
+          ''; // Fetch the user's role from Firestore
+      setState(() {
+        _userRole = userRole;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -45,18 +82,20 @@ class HomePage extends StatelessWidget {
               );
             },
           ),
-          IconButton(
-            icon: Icon(
-              Icons.add,
-              color: Colors.white,
+          if (_userRole ==
+              'Event Owner') // Conditionally show the "Add Event" button
+            IconButton(
+              icon: Icon(
+                Icons.add,
+                color: Colors.white,
+              ),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => AddEventPage()),
+                );
+              },
             ),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => AddEventPage()),
-              );
-            },
-          ),
         ],
       ),
       drawer: Drawer(
@@ -91,21 +130,23 @@ class HomePage extends StatelessWidget {
                 );
               },
             ),
-            ListTile(
-              leading: Icon(Icons.event),
-              title: Text(
-                "Add Event",
-                style: TextStyle(
-                  color: Colors.black,
+            if (_userRole ==
+                'Event Owner') // Conditionally show the "Add Event" option in the drawer
+              ListTile(
+                leading: Icon(Icons.event),
+                title: Text(
+                  "Add Event",
+                  style: TextStyle(
+                    color: Colors.black,
+                  ),
                 ),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => AddEventPage()),
+                  );
+                },
               ),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => AddEventPage()),
-                );
-              },
-            ),
             ListTile(
               leading: Icon(Icons.logout),
               title: Text(
@@ -145,7 +186,6 @@ class HomePage extends StatelessWidget {
               } else {
                 final events = snapshot.data!.docs;
 
-                // Inside the ListView.builder in HomePage
                 return ListView.builder(
                   itemCount: events.length,
                   itemBuilder: (context, index) {
@@ -154,14 +194,13 @@ class HomePage extends StatelessWidget {
                     final date = event['EventDate'] != null
                         ? (event['EventDate'] as Timestamp).toDate()
                         : DateTime.now();
-                    final imageUrl =
-                        event['EventImage']; // Update to use 'EventImage'
+                    final imageUrl = event['EventImage'];
 
                     return Card(
                       margin: EdgeInsets.all(16),
                       child: Column(
                         children: [
-                          if (imageUrl != null) // Check if imageUrl is not null
+                          if (imageUrl != null)
                             Image.network(
                               imageUrl,
                               width: double.infinity,
