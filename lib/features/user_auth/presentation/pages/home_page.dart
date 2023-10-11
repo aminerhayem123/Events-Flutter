@@ -73,8 +73,7 @@ class _HomePageState extends State<HomePage> {
               );
             },
           ),
-          if (_userRole ==
-              'Event Owner') // Conditionally show the "Add Event" button
+          if (_userRole == 'Event Owner')
             IconButton(
               icon: Icon(
                 Icons.add,
@@ -121,8 +120,7 @@ class _HomePageState extends State<HomePage> {
                 );
               },
             ),
-            if (_userRole ==
-                'Event Owner') // Conditionally show the "Add Event" option in the drawer
+            if (_userRole == 'Event Owner')
               ListTile(
                 leading: Icon(Icons.event),
                 title: Text(
@@ -177,8 +175,6 @@ class _HomePageState extends State<HomePage> {
               } else {
                 final events = snapshot.data!.docs;
 
-                // Inside the StreamBuilder in HomePage
-
                 return ListView.builder(
                   itemCount: events.length,
                   itemBuilder: (context, index) {
@@ -190,17 +186,15 @@ class _HomePageState extends State<HomePage> {
                         ? (event['EventDate'] as Timestamp).toDate()
                         : DateTime.now();
                     final imageUrl = event['EventImage'];
-                    final likes = event['likes'] ?? 0; // Add likes
-                    final comments = event['comments'] ?? 0; // Add comments
+                    final likes = event['likes'] ?? 0;
 
                     return EventCard(
-                      eventId: eventId, // Pass the eventId to the EventCard
+                      eventId: eventId,
                       imageUrl: imageUrl,
                       title: title,
                       date: date,
                       userRole: _userRole,
                       likes: likes,
-                      comments: comments,
                     );
                   },
                 );
@@ -214,22 +208,20 @@ class _HomePageState extends State<HomePage> {
 }
 
 class EventCard extends StatefulWidget {
-  final String eventId; // Add eventId
+  final String eventId;
   final String imageUrl;
   final String title;
   final DateTime date;
   final String userRole;
-  final int likes; // Add likes
-  final int comments; // Add comments
+  final int likes;
 
   EventCard({
-    required this.eventId, // Include eventId
+    required this.eventId,
     required this.imageUrl,
     required this.title,
     required this.date,
     required this.userRole,
-    required this.likes, // Include likes
-    required this.comments, // Include comments
+    required this.likes,
   });
 
   @override
@@ -237,27 +229,32 @@ class EventCard extends StatefulWidget {
 }
 
 class _EventCardState extends State<EventCard> {
-  int likes = 0; // New variable to store likes count
-  int comments = 0; // New variable to store comments count
+  int likes = 0;
   bool isLiked = false;
 
   @override
   void initState() {
     super.initState();
-    // Fetch likes and comments for this event
-    _fetchEventLikesAndComments();
+    _fetchEventLikes();
   }
 
-  Future<void> _fetchEventLikesAndComments() async {
+  Future<void> _fetchEventLikes() async {
     final eventDoc = await FirebaseFirestore.instance
         .collection('events')
-        .doc('eventID')
+        .doc(widget.eventId)
         .get();
     final eventData = eventDoc.data();
     if (eventData != null) {
       setState(() {
         likes = eventData['likes'] ?? 0;
-        comments = eventData['comments'] ?? 0;
+        // Check if the current user has liked the event
+        if (eventData['likedBy'] != null) {
+          final likedBy = List<String>.from(eventData['likedBy']);
+          final user = FirebaseAuth.instance.currentUser;
+          if (user != null && likedBy.contains(user.uid)) {
+            isLiked = true;
+          }
+        }
       });
     }
   }
@@ -294,12 +291,10 @@ class _EventCardState extends State<EventCard> {
                   ),
                 ),
                 if (widget.userRole != 'Event Owner')
-                  CommentAndLikeButtons(
+                  LikeButtons(
                     likes: likes,
-                    comments: comments,
                     isLiked: isLiked,
                     onLike: _toggleLike,
-                    onComment: _addComment,
                   ),
               ],
             ),
@@ -310,7 +305,6 @@ class _EventCardState extends State<EventCard> {
   }
 
   void _toggleLike() {
-    // Implement the logic to toggle the like status and update the likes count.
     setState(() {
       isLiked = !isLiked;
       if (isLiked) {
@@ -320,47 +314,38 @@ class _EventCardState extends State<EventCard> {
       }
     });
 
-    // Update the likes count in Firestore
-    FirebaseFirestore.instance
-        .collection('events')
-        .doc(widget.eventId)
-        .update({'likes': likes});
-  }
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      final userUid = user.uid;
 
-  void _addComment() {
-    // Implement the logic to add a comment.
-    setState(() {
-      comments++;
-    });
-
-    // Update the comments count in Firestore
-    FirebaseFirestore.instance
-        .collection('events')
-        .doc(widget.eventId)
-        .update({'comments': comments});
+      // Update the 'likedBy' array in Firestore to keep track of likes
+      FirebaseFirestore.instance
+          .collection('events')
+          .doc(widget.eventId)
+          .update({
+        'likes': likes,
+        'likedBy': FieldValue.arrayUnion([userUid]),
+      });
+    }
   }
 }
 
-class CommentAndLikeButtons extends StatefulWidget {
+class LikeButtons extends StatefulWidget {
   final int likes;
-  final int comments;
   final bool isLiked;
   final VoidCallback onLike;
-  final VoidCallback onComment;
 
-  CommentAndLikeButtons({
+  LikeButtons({
     required this.likes,
-    required this.comments,
     required this.isLiked,
     required this.onLike,
-    required this.onComment,
   });
 
   @override
-  _CommentAndLikeButtonsState createState() => _CommentAndLikeButtonsState();
+  _LikeButtonsState createState() => _LikeButtonsState();
 }
 
-class _CommentAndLikeButtonsState extends State<CommentAndLikeButtons> {
+class _LikeButtonsState extends State<LikeButtons> {
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -373,11 +358,6 @@ class _CommentAndLikeButtonsState extends State<CommentAndLikeButtons> {
           onPressed: widget.onLike,
         ),
         Text('${widget.likes} Likes'),
-        IconButton(
-          icon: Icon(Icons.comment),
-          onPressed: widget.onComment,
-        ),
-        Text('${widget.comments} Comments'),
       ],
     );
   }
