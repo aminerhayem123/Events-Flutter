@@ -305,27 +305,41 @@ class _EventCardState extends State<EventCard> {
   }
 
   void _toggleLike() {
-    setState(() {
-      isLiked = !isLiked;
-      if (isLiked) {
-        likes++;
-      } else {
-        likes--;
-      }
-    });
-
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       final userUid = user.uid;
 
-      // Update the 'likedBy' array in Firestore to keep track of likes
-      FirebaseFirestore.instance
-          .collection('events')
-          .doc(widget.eventId)
-          .update({
-        'likes': likes,
-        'likedBy': FieldValue.arrayUnion([userUid]),
-      });
+      if (isLiked) {
+        // If the user has already liked the event, remove their like
+        setState(() {
+          isLiked = false;
+          likes--;
+        });
+
+        // Update the 'likedBy' array in Firestore to remove the user's ID
+        FirebaseFirestore.instance
+            .collection('events')
+            .doc(widget.eventId)
+            .update({
+          'likes': likes,
+          'likedBy': FieldValue.arrayRemove([userUid]),
+        });
+      } else {
+        // If the user hasn't liked the event, add their like
+        setState(() {
+          isLiked = true;
+          likes++;
+        });
+
+        // Update the 'likedBy' array in Firestore to add the user's ID
+        FirebaseFirestore.instance
+            .collection('events')
+            .doc(widget.eventId)
+            .update({
+          'likes': likes,
+          'likedBy': FieldValue.arrayUnion([userUid]),
+        });
+      }
     }
   }
 }
