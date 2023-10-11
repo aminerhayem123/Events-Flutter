@@ -1,13 +1,4 @@
 import 'dart:typed_data';
-
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
-import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:intl/intl.dart';
-
-import 'dart:typed_data';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
@@ -186,50 +177,30 @@ class _HomePageState extends State<HomePage> {
               } else {
                 final events = snapshot.data!.docs;
 
+                // Inside the StreamBuilder in HomePage
+
                 return ListView.builder(
                   itemCount: events.length,
                   itemBuilder: (context, index) {
-                    final event = events[index].data() as Map<String, dynamic>;
+                    final eventDoc = events[index];
+                    final eventId = eventDoc.id;
+                    final event = eventDoc.data() as Map<String, dynamic>;
                     final title = event['EventTitle'] ?? '';
                     final date = event['EventDate'] != null
                         ? (event['EventDate'] as Timestamp).toDate()
                         : DateTime.now();
                     final imageUrl = event['EventImage'];
+                    final likes = event['likes'] ?? 0; // Add likes
+                    final comments = event['comments'] ?? 0; // Add comments
 
-                    return Card(
-                      margin: EdgeInsets.all(16),
-                      child: Column(
-                        children: [
-                          if (imageUrl != null)
-                            Image.network(
-                              imageUrl,
-                              width: double.infinity,
-                              height: 200,
-                              fit: BoxFit.cover,
-                            ),
-                          Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  title,
-                                  style: TextStyle(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                Text(
-                                  DateFormat('MMMM d, y HH:mm').format(date),
-                                  style: TextStyle(
-                                    color: Colors.grey,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
+                    return EventCard(
+                      eventId: eventId, // Pass the eventId to the EventCard
+                      imageUrl: imageUrl,
+                      title: title,
+                      date: date,
+                      userRole: _userRole,
+                      likes: likes,
+                      comments: comments,
                     );
                   },
                 );
@@ -238,6 +209,176 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
       ),
+    );
+  }
+}
+
+class EventCard extends StatefulWidget {
+  final String eventId; // Add eventId
+  final String imageUrl;
+  final String title;
+  final DateTime date;
+  final String userRole;
+  final int likes; // Add likes
+  final int comments; // Add comments
+
+  EventCard({
+    required this.eventId, // Include eventId
+    required this.imageUrl,
+    required this.title,
+    required this.date,
+    required this.userRole,
+    required this.likes, // Include likes
+    required this.comments, // Include comments
+  });
+
+  @override
+  _EventCardState createState() => _EventCardState();
+}
+
+class _EventCardState extends State<EventCard> {
+  int likes = 0; // New variable to store likes count
+  int comments = 0; // New variable to store comments count
+  bool isLiked = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Fetch likes and comments for this event
+    _fetchEventLikesAndComments();
+  }
+
+  Future<void> _fetchEventLikesAndComments() async {
+    final eventDoc = await FirebaseFirestore.instance
+        .collection('events')
+        .doc('eventID')
+        .get();
+    final eventData = eventDoc.data();
+    if (eventData != null) {
+      setState(() {
+        likes = eventData['likes'] ?? 0;
+        comments = eventData['comments'] ?? 0;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: EdgeInsets.all(16),
+      child: Column(
+        children: [
+          if (widget.imageUrl != null)
+            Image.network(
+              widget.imageUrl,
+              width: double.infinity,
+              height: 200,
+              fit: BoxFit.cover,
+            ),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  widget.title,
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Text(
+                  DateFormat('MMMM d, y HH:mm').format(widget.date),
+                  style: TextStyle(
+                    color: Colors.grey,
+                  ),
+                ),
+                if (widget.userRole != 'Event Owner')
+                  CommentAndLikeButtons(
+                    likes: likes,
+                    comments: comments,
+                    isLiked: isLiked,
+                    onLike: _toggleLike,
+                    onComment: _addComment,
+                  ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _toggleLike() {
+    // Implement the logic to toggle the like status and update the likes count.
+    setState(() {
+      isLiked = !isLiked;
+      if (isLiked) {
+        likes++;
+      } else {
+        likes--;
+      }
+    });
+
+    // Update the likes count in Firestore
+    FirebaseFirestore.instance
+        .collection('events')
+        .doc(widget.eventId)
+        .update({'likes': likes});
+  }
+
+  void _addComment() {
+    // Implement the logic to add a comment.
+    setState(() {
+      comments++;
+    });
+
+    // Update the comments count in Firestore
+    FirebaseFirestore.instance
+        .collection('events')
+        .doc(widget.eventId)
+        .update({'comments': comments});
+  }
+}
+
+class CommentAndLikeButtons extends StatefulWidget {
+  final int likes;
+  final int comments;
+  final bool isLiked;
+  final VoidCallback onLike;
+  final VoidCallback onComment;
+
+  CommentAndLikeButtons({
+    required this.likes,
+    required this.comments,
+    required this.isLiked,
+    required this.onLike,
+    required this.onComment,
+  });
+
+  @override
+  _CommentAndLikeButtonsState createState() => _CommentAndLikeButtonsState();
+}
+
+class _CommentAndLikeButtonsState extends State<CommentAndLikeButtons> {
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        IconButton(
+          icon: Icon(
+            widget.isLiked ? Icons.favorite : Icons.favorite_border,
+            color: widget.isLiked ? Colors.red : Colors.black,
+          ),
+          onPressed: widget.onLike,
+        ),
+        Text('${widget.likes} Likes'),
+        IconButton(
+          icon: Icon(Icons.comment),
+          onPressed: widget.onComment,
+        ),
+        Text('${widget.comments} Comments'),
+      ],
     );
   }
 }
@@ -392,9 +533,8 @@ class _AddEventPageState extends State<AddEventPage> {
   int _selectedHour = 0;
   int _selectedMinute = 0;
   bool _isAM = true;
-  List<String> _imageUrls = [];
   List<Uint8List> _imageBytes = [];
-  final picker = ImagePicker();
+  final picker = ImagePicker(); // Define the ImagePicker here
 
   @override
   Widget build(BuildContext context) {
@@ -439,9 +579,11 @@ class _AddEventPageState extends State<AddEventPage> {
                 final selectedDate = await showDatePicker(
                   context: context,
                   initialDate: _selectedDate,
-                  firstDate: DateTime(2022),
+                  firstDate: DateTime
+                      .now(), // Set the minimum selectable date to the current date
                   lastDate: DateTime(2025),
                 );
+
                 if (selectedDate != null) {
                   setState(() {
                     _selectedDate = selectedDate;
@@ -518,7 +660,7 @@ class _AddEventPageState extends State<AddEventPage> {
                 "Add Image",
                 style: TextStyle(
                   color: Colors.white,
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.bold, // Valid 'FontWeight'
                   fontSize: 18,
                 ),
               ),
@@ -557,8 +699,8 @@ class _AddEventPageState extends State<AddEventPage> {
 
   void _addEventToFirebase() async {
     final title = _titleController.text;
-    final date = _selectedDate
-        .add(Duration(hours: _selectedHour, minutes: _selectedMinute));
+    final date = _selectedDate.add(Duration(
+        hours: _selectedHour + (_isAM ? 0 : 12), minutes: _selectedMinute));
 
     // Generate a unique ID for the event
     final eventId = FirebaseFirestore.instance.collection('events').doc().id;
@@ -576,7 +718,7 @@ class _AddEventPageState extends State<AddEventPage> {
 
       final eventData = {
         'EventTitle': title,
-        'EventDate': date,
+        'EventDate': date, // Store the event date as a Timestamp
         'EventImage': imageUrl, // Store the image URL
       };
 
