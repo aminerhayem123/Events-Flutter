@@ -15,6 +15,14 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   String _userRole = ''; // Store the user's role
+  List<String> categories = [
+    'All',
+    'Party',
+    'Education',
+    'Music'
+  ]; // Include 'All' to show all events initially
+  String selectedCategory =
+      'All'; // Initialize with 'All' to show all events initially
 
   @override
   void initState() {
@@ -165,63 +173,113 @@ class _HomePageState extends State<HomePage> {
           Container(
             color: Colors.black.withOpacity(0.6),
           ),
-          StreamBuilder(
-            stream: FirebaseFirestore.instance.collection('events').snapshots(),
-            builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return CircularProgressIndicator();
-              } else if (snapshot.hasError) {
-                return Text('Error: ${snapshot.error}');
-              } else {
-                final events = snapshot.data!.docs;
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Container(
+              height: 40, // Set the desired height
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                children: categories.map((category) {
+                  return Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 16),
+                    child: InkWell(
+                      onTap: () {
+                        setState(() {
+                          selectedCategory = category;
+                        });
+                      },
+                      child: Container(
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                        decoration: BoxDecoration(
+                          color: selectedCategory == category
+                              ? Color.fromARGB(255, 196, 2, 44)
+                              : Color.fromARGB(255, 220, 220, 220),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(
+                          category,
+                          style: TextStyle(
+                            color: selectedCategory == category
+                                ? Colors.white
+                                : Colors.black,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
+          ),
+          Positioned(
+              top: 60, // Adjust the top position as needed
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: StreamBuilder(
+                stream:
+                    FirebaseFirestore.instance.collection('events').snapshots(),
+                builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return CircularProgressIndicator();
+                  } else if (snapshot.hasError) {
+                    return Text('Error: ${snapshot.error}');
+                  } else {
+                    final events = snapshot.data!.docs;
 
-                return ListView.builder(
-                  itemCount: events.length,
-                  itemBuilder: (context, index) {
-                    final eventDoc = events[index];
-                    final eventId = eventDoc.id;
-                    final event = eventDoc.data() as Map<String, dynamic>;
-                    final title = event['EventTitle'] ?? '';
-                    final date = event['EventDate'] != null
-                        ? (event['EventDate'] as Timestamp).toDate()
-                        : DateTime.now();
-                    final imageUrl = event['EventImage'];
-                    final likes = event['likes'] ?? 0;
-                    final ownerId = event['ownerId'];
+                    return ListView.builder(
+                      itemCount: events.length,
+                      itemBuilder: (context, index) {
+                        final eventDoc = events[index];
+                        final eventId = eventDoc.id;
+                        final event = eventDoc.data() as Map<String, dynamic>;
+                        final title = event['EventTitle'] ?? '';
+                        final date = event['EventDate'] != null
+                            ? (event['EventDate'] as Timestamp).toDate()
+                            : DateTime.now();
+                        final imageUrl = event['EventImage'];
+                        final likes = event['likes'] ?? 0;
+                        final ownerId = event['ownerId'];
+                        final category = event['category']; // Add category
 
-                    if (_userRole == 'Event Owner') {
-                      final currentUserUid =
-                          FirebaseAuth.instance.currentUser?.uid;
-                      // Check if the event's owner is the current user
-                      if (currentUserUid == ownerId) {
-                        return EventCard(
-                          eventId: eventId,
-                          imageUrl: imageUrl,
-                          title: title,
-                          date: date,
-                          userRole: _userRole,
-                          likes: likes,
-                        );
-                      } else {
-                        // If the user is an event owner but not the owner of this event, return an empty container
-                        return Container();
-                      }
-                    } else {
-                      // For simple users, display all events
-                      return EventCard(
-                        eventId: eventId,
-                        imageUrl: imageUrl,
-                        title: title,
-                        date: date,
-                        userRole: _userRole,
-                        likes: likes,
-                      );
-                    }
-                  },
-                );
-              }
-            },
-          )
+                        if (selectedCategory == 'All' ||
+                            selectedCategory == category) {
+                          // Filter events based on the selected category
+                          if (_userRole == 'Event Owner') {
+                            final currentUserUid =
+                                FirebaseAuth.instance.currentUser?.uid;
+                            if (currentUserUid == ownerId) {
+                              return EventCard(
+                                eventId: eventId,
+                                imageUrl: imageUrl,
+                                title: title,
+                                date: date,
+                                userRole: _userRole,
+                                likes: likes,
+                              );
+                            } else {
+                              return Container();
+                            }
+                          } else {
+                            return EventCard(
+                              eventId: eventId,
+                              imageUrl: imageUrl,
+                              title: title,
+                              date: date,
+                              userRole: _userRole,
+                              likes: likes,
+                            );
+                          }
+                        } else {
+                          return Container();
+                        }
+                      },
+                    );
+                  }
+                },
+              ))
         ],
       ),
     );
