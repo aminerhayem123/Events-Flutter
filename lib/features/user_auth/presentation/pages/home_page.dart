@@ -317,6 +317,14 @@ class _EventCardState extends State<EventCard> {
                     isLiked: isLiked,
                     onLike: _toggleLike,
                   ),
+                if (widget.userRole ==
+                    'Event Owner') // Display likes for Event Owners
+                  Text(
+                    '${likes} Likes',
+                    style: TextStyle(
+                      fontSize: 16,
+                    ),
+                  ),
               ],
             ),
           ),
