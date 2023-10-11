@@ -187,20 +187,41 @@ class _HomePageState extends State<HomePage> {
                         : DateTime.now();
                     final imageUrl = event['EventImage'];
                     final likes = event['likes'] ?? 0;
+                    final ownerId = event['ownerId'];
 
-                    return EventCard(
-                      eventId: eventId,
-                      imageUrl: imageUrl,
-                      title: title,
-                      date: date,
-                      userRole: _userRole,
-                      likes: likes,
-                    );
+                    if (_userRole == 'Event Owner') {
+                      final currentUserUid =
+                          FirebaseAuth.instance.currentUser?.uid;
+                      // Check if the event's owner is the current user
+                      if (currentUserUid == ownerId) {
+                        return EventCard(
+                          eventId: eventId,
+                          imageUrl: imageUrl,
+                          title: title,
+                          date: date,
+                          userRole: _userRole,
+                          likes: likes,
+                        );
+                      } else {
+                        // If the user is an event owner but not the owner of this event, return an empty container
+                        return Container();
+                      }
+                    } else {
+                      // For simple users, display all events
+                      return EventCard(
+                        eventId: eventId,
+                        imageUrl: imageUrl,
+                        title: title,
+                        date: date,
+                        userRole: _userRole,
+                        likes: likes,
+                      );
+                    }
                   },
                 );
               }
             },
-          ),
+          )
         ],
       ),
     );
@@ -714,6 +735,8 @@ class _AddEventPageState extends State<AddEventPage> {
         'EventTitle': title,
         'EventDate': date, // Store the event date as a Timestamp
         'EventImage': imageUrl, // Store the image URL
+        'ownerId':
+            FirebaseAuth.instance.currentUser?.uid, // Set the event owner's ID
       };
 
       // Save event details to Firestore
