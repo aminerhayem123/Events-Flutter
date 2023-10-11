@@ -558,6 +558,7 @@ class _AddEventPageState extends State<AddEventPage> {
   bool _isAM = true;
   List<Uint8List> _imageBytes = [];
   final picker = ImagePicker(); // Define the ImagePicker here
+  String _selectedCategory = 'Party'; // Default category selection
 
   @override
   Widget build(BuildContext context) {
@@ -597,6 +598,20 @@ class _AddEventPageState extends State<AddEventPage> {
               ),
             ),
             SizedBox(height: 20),
+            DropdownButton<String>(
+              value: _selectedCategory,
+              onChanged: (String? newValue) {
+                setState(() {
+                  _selectedCategory = newValue ?? 'Party';
+                });
+              },
+              items: ['Party', 'Education', 'Music'].map((value) {
+                return DropdownMenuItem<String>(
+                  value: value,
+                  child: Text(value),
+                );
+              }).toList(),
+            ),
             TextButton(
               onPressed: () async {
                 final selectedDate = await showDatePicker(
@@ -745,6 +760,7 @@ class _AddEventPageState extends State<AddEventPage> {
         'EventImage': imageUrl, // Store the image URL
         'ownerId':
             FirebaseAuth.instance.currentUser?.uid, // Set the event owner's ID
+        'category': _selectedCategory, // Set the selected category
       };
 
       // Save event details to Firestore
