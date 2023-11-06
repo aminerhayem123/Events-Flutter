@@ -57,8 +57,11 @@ Before you begin, ensure you have met the following requirements:
 #### Profile:
 <img aline="center" src="https://i.imgur.com/0ngGfA9.png" alt="secreenshot">
 
-#### HomePage:
-<img aline="center" src="https://i.imgur.com/k5kx3MG.png" alt="secreenshot">
+#### simple_user's_HomePage:
+<img aline="center" src="https://i.imgur.com/s3V66M9.png" alt="secreenshot">
+
+#### eventowner_HomePage:
+<img aline="center" src="https://i.imgur.com/s3V66M9.png" alt="secreenshot">
 
 #### Add Event:
 <img aline="center" src="https://i.imgur.com/UliwWO0.png" alt="secreenshot">
