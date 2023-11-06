@@ -52,7 +52,7 @@ Before you begin, ensure you have met the following requirements:
 <img aline="center" src="https://i.imgur.com/PkVejB8.png" alt="secreenshot">
 
 #### Sign up:
-<img aline="center" src="https://i.imgur.com/ayREHoW.png" alt="secreenshot">
+<img aline="center" src="https://i.imgur.com/7N9F02u.png" alt="secreenshot">
 
 #### Profile:
 <img aline="center" src="https://i.imgur.com/0ngGfA9.png" alt="secreenshot">
