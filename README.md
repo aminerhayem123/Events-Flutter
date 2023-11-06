@@ -61,7 +61,7 @@ Before you begin, ensure you have met the following requirements:
 <img aline="center" src="https://i.imgur.com/s3V66M9.png" alt="secreenshot">
 
 #### eventowner_HomePage:
-<img aline="center" src="https://i.imgur.com/s3V66M9.png" alt="secreenshot">
+<img aline="center" src="https://i.imgur.com/z4B7WDA.png" alt="secreenshot">
 
 #### Add Event:
 <img aline="center" src="https://i.imgur.com/UliwWO0.png" alt="secreenshot">
